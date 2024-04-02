@@ -10,6 +10,7 @@ export default class Preloader extends Phaser.Scene{
     }
     preload(){
         this.loadAssets();
+        this.load.css('google-font', 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         let _graphics = this.add.graphics();
         let _graphics1: Phaser.GameObjects.Graphics = this.add.graphics();
         _graphics1.fillStyle(0x000000, .7);
@@ -24,6 +25,8 @@ export default class Preloader extends Phaser.Scene{
     create(){
         this.scene.stop();
         this.scene.start("gameplay");
+        this.scene.start("hud");
+        this.scene.bringToTop("hud")
         
     }
 

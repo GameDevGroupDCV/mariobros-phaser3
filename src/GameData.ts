@@ -34,6 +34,13 @@ export let GameData: gameData = {
       width:16.53,
       height:26,
       frames:30,
+    },
+    {
+      name:"coins",
+      path:"assets/images/coins.png",
+      width:19,
+      height:15,
+      frames:2
     }
   ],
   images: [

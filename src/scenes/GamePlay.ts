@@ -1,4 +1,5 @@
 import Mario from "../GameComponents/MarioBros/Mario";
+import Coin from "../GameComponents/coin/Coin";
 import { GameData } from "../GameData";
 
 
@@ -14,6 +15,8 @@ export default class GamePlay extends Phaser.Scene{
     private _body:Phaser.Physics.Arcade.Body;
     private inTube:boolean = false;
     private layerOverlap:Phaser.Tilemaps.TilemapLayer;
+    private layerObject:Phaser.Tilemaps.ObjectLayer;
+    private coinGroup:Phaser.GameObjects.Group;
 
     constructor(){
         super({key:"gameplay"});
@@ -29,7 +32,9 @@ export default class GamePlay extends Phaser.Scene{
 
         this.mainCamera.startFollow(this.player, false, 1,0);
 
+        this.coinGroup = this.add.group();
         this.createMap();
+        this.setupObject();
         
     }
 
@@ -60,22 +65,49 @@ export default class GamePlay extends Phaser.Scene{
         this.layerCollision.setCollisionByProperty({collide:true});
         this.layerOverlap.setCollisionByProperty({collide:true});
 
-        this.physics.add.collider(this.player, this.layerCollision, this.onCollisionDeath, null, this);
+        this.physics.add.collider(this.player, this.layerCollision, this.onCollision, null, this);
+        this.physics.add.overlap(this.player, this.coinGroup, this.onCollisionGroup, null, this);
         this.physics.add.overlap(this.player, this.layerOverlap, this.onCollisionOverlap, null, this);
+        
+        this.layerCollision.forEachTile((tile:Phaser.Tilemaps.Tile) =>{
+            if(tile.properties.tube == true){
+                console.log(tile.pixelX, tile.pixelY);
+            }
+        })
     }
 
-    onCollisionDeath(player:any, tile:any):void{
+    setupObject():void{
+        this.layerObject = this._map.getObjectLayer("GameObjects");
+        if (this.layerObject != null) {
+            let _objects: any = this.layerObject.objects as any[];
+            _objects.forEach((tile:Phaser.Tilemaps.Tile) => {
+                console.log(_objects);
+                console.log(tile);
+              var _objectValue = JSON.parse(tile.properties[0].value).type;
+
+              switch (_objectValue) {
+                case "bonus":
+                  this.addCoin(new Coin({scene: this, x: tile.x, y: tile.y, key: "coins", frame:1}));
+                  break;
+              }
+              
+            })
+        }
+    }   
+
+    onCollision(player:any, tile:any):void{
+        
         if(tile.properties.death == true){
             this.player.setPosition(this.startPosition.x, this.startPosition.y);
         }
         if(tile.properties.tube == true){
             if(this._body.blocked.down == true && !this.inTube){
-                this.player.setPosition(976,752);
+                this.player.setPosition(800,592);
                 this.mainCamera.startFollow(this.player, null, 1, 1);
                 this.inTube = true;
             }
             else if(this._body.blocked.right == true && this.inTube){
-                this.player.setPosition(928,464);
+                this.player.setPosition(2608,464);
                 this.mainCamera.startFollow(this.player, null, 1,0);
                 this.mainCamera.setScroll(0,0);
             }
@@ -87,7 +119,6 @@ export default class GamePlay extends Phaser.Scene{
         if(tile.properties.flag == true){
             this.player.anims.play('flag', true);
             console.log(tile);
-            console.log(tile.pixelX + " " + tile.pixelY);
             this.player.setPosition(tile.pixelX, tile.pixelY);
             this._body.setAllowGravity(false);
             this.add.tween({
@@ -127,7 +158,13 @@ export default class GamePlay extends Phaser.Scene{
                 onComplete: () =>{console.log("hai vinto")}
             })
         }
-        
+    }
+
+    onCollisionGroup(player:any, coin:any):void{
+        this.coinGroup.remove(coin, true, true);
+    }
+    addCoin(_coin:Coin):void{
+        this.coinGroup.add(_coin);
     }
 
 }

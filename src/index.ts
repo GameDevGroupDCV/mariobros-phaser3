@@ -2,6 +2,7 @@
 import "phaser";
 import GamePlay from "./scenes/GamePlay";
 import Preloader from "./scenes/preloader";
+import Hud from "./scenes/Hud";
 //importiamo le nostre scene
 //importiamo GameData che contiene i valori globali del gioco
 import { GameData } from "./GameData";
@@ -29,6 +30,7 @@ window.addEventListener("load", () => {
     scene: [
       Preloader,
       GamePlay,
+      Hud,
     ],
     physics: {
       default: "arcade",
